@@ -71,11 +71,12 @@ bool FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       float x_cart = measurement_pack.raw_measurements_[0] * cos(measurement_pack.raw_measurements_[1]);
       float y_cart = measurement_pack.raw_measurements_[0] * sin(measurement_pack.raw_measurements_[1]);
 
-      if (x_cart == 0 or y_cart == 0){
-          cout << "They're both zero" << endl;
-        return false;
+      if (x_cart < 0.1 and y_cart < 0.1){
+        x_cart = 0.1;
+        y_cart = 0.1;
+        //return false;
       }
-      cout << "x and y" << x_cart << " " << y_cart << endl;
+      //cout << "x and y" << x_cart << " " << y_cart << endl;
       ekf_.x_ << x_cart, y_cart, 0, 0;
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
@@ -130,7 +131,9 @@ bool FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     dt_3/2*noise_ax, 0, dt_2*noise_ax, 0,
     0, dt_3/2*noise_ay, 0, dt_2*noise_ay;
 
-    ekf_.Predict();
+    if (dt > 0.001) {
+      ekf_.Predict();
+    }
 
 
   /*****************************************************************************
